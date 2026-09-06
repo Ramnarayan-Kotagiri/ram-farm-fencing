@@ -12,6 +12,7 @@ import {
 import { sideIds, sides, FT, type SideId } from '../data/farmSurvey';
 import type { Scenario } from '../data/scenarios';
 import { calculate, hasMesh, wireHeights, lengthFor } from '../geometry/materialCalculator';
+import { supportDimensions } from '../geometry/supportGeometry';
 type Props = {
   scenario: Scenario;
   result: ReturnType<typeof calculate>;
@@ -296,13 +297,15 @@ export function Farm3D({ scenario, result, selected, onSide, onPost }: Props) {
         );
       if (p.stays) {
         for (let j = 0; j < p.stays; j++) {
-          const h = Math.min(
-              (c.poleLength - c.embed) * FT,
-              c.stayLength * FT * Math.sin((c.stayAngle * Math.PI) / 180),
-            ),
-            run = h / Math.tan((c.stayAngle * Math.PI) / 180);
-          const direction = j === 0 ? normal : dir;
-          group.add(beam(v(p, h), v(p).addScaledVector(direction, run), 0.055, stayMat));
+          const { height, run } = supportDimensions(c);
+          const direction = p.stays === 2 ? dir.clone().multiplyScalar(j === 0 ? -1 : 1) : normal;
+          const top = v(p, height * FT),
+            foot = v(p).addScaledVector(direction, run * FT);
+          const delta = foot.clone().sub(top);
+          const brace = new T.Mesh(new T.BoxGeometry(0.11, delta.length(), 0.11), stayMat);
+          brace.position.copy(top).add(foot).multiplyScalar(0.5);
+          brace.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), delta.normalize());
+          group.add(brace);
         }
       }
       if (p.concrete) {

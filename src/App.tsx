@@ -24,7 +24,7 @@ import { preset } from './data/scenarios';
 import { calculate, lengthFor } from './geometry/materialCalculator';
 import { Plan } from './components/Plan';
 import { Farm3D } from './components/Farm3D';
-import { CrossSection, Elevation } from './components/Engineering';
+import { CrossSection, Elevation, SupportAssembly } from './components/Engineering';
 export const money = (n: number) =>
   new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -35,7 +35,7 @@ export default function App() {
   const { scenario, rates } = useFarm(),
     [side, setSide] = useState<SideId | null>(null),
     [view, setView] = useState('plan'),
-    [vendor, setVendor] = useState(() => window.matchMedia('(max-width:800px)').matches),
+    [vendor, setVendor] = useState(false),
     [post, setPost] = useState(''),
     [notice, setNotice] = useState(startupWarning),
     [zoom, setZoom] = useState(1),
@@ -69,7 +69,7 @@ export default function App() {
         </div>
         <div className="header-actions">
           <button className={!vendor ? 'active' : ''} onClick={() => setVendor(false)}>
-            Planner
+            Farmer View
           </button>
           <button
             className={vendor ? 'active' : ''}
@@ -272,15 +272,20 @@ export default function App() {
             {[
               ['plan', 'Farm view'],
               ['boq', 'Materials & costs'],
-              ['compare', 'Compare scenarios'],
-              ['inspection', 'Post inspections'],
-              ['sources', 'Accuracy & sources'],
               ['exports', 'Share & export'],
             ].map(([id, label]) => (
               <button key={id} className={view === id ? 'active' : ''} onClick={() => setView(id)}>
                 {label}
               </button>
             ))}
+            <details className="more-tools">
+              <summary>More tools</summary>
+              <div>
+                <button onClick={() => setView('compare')}>Compare scenarios</button>
+                <button onClick={() => setView('inspection')}>Post inspections</button>
+                <button onClick={() => setView('sources')}>Accuracy & sources</button>
+              </div>
+            </details>
           </div>
           {visual && (
             <>
@@ -361,6 +366,7 @@ export default function App() {
                         </button>
                       </div>
                       <CrossSection config={config} />
+                      {config.supportMode !== 'none' && <SupportAssembly config={config} />}
                       <Elevation scenario={scenario} result={result} side={active} zoom={zoom} />
                     </>
                   ) : (
@@ -467,14 +473,20 @@ export default function App() {
                   Save top plan PNG
                 </button>
               )}
-              {!vendor && (
+              <details className="customize-drawer" key={active + String(vendor)}>
+                <summary>
+                  <strong>
+                    {vendor ? 'Adjust specifications for your quote' : 'Customize this side'}
+                  </strong>
+                  <span>{sides[active].name} · fence, poles, supports, gates & more</span>
+                </summary>
                 <Configurator
                   onSelectSection={setSectionIndex}
                   side={active}
                   result={result}
                   notify={setNotice}
                 />
-              )}{' '}
+              </details>
               {vendor && <VendorSchedule scenario={scenario} result={result} />}
             </>
           )}

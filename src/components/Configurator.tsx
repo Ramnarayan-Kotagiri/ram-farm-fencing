@@ -3,6 +3,7 @@ import { useFarm, updateScenario } from '../store/farmStore';
 import { type FenceConfig, baseConfig } from '../data/scenarios';
 import { type SideId, sides } from '../data/farmSurvey';
 import { lengthFor, hasMesh, calculate } from '../geometry/materialCalculator';
+import { SupportAssembly } from './Engineering';
 export function Numeric({
   label,
   value,
@@ -266,7 +267,7 @@ export function Configurator({
       </details>
       {c.type !== 'none' && c.type !== 'existing' && (
         <>
-          <details open>
+          <details>
             <summary>Mesh & barbed-wire design</summary>
             <div className="field-grid">
               {n(
@@ -331,7 +332,7 @@ export function Configurator({
               </label>
             </div>
           </details>
-          <details open>
+          <details>
             <summary>Main poles & embedment</summary>
             <div className="field-grid">
               {choice('poleType', 'Pole type', [
@@ -380,6 +381,7 @@ export function Configurator({
           </details>
           <details>
             <summary>Supports, stays & strainers</summary>
+            <SupportAssembly config={c} />
             <div className="field-grid">
               {choice('supportMode', 'Support placement', [
                 ['none', 'None'],
@@ -392,10 +394,16 @@ export function Configurator({
               {n('supportEvery', 'N posts / X feet', 1, 500, 0.01)}
               {n('stayLength', 'Stay pole length (ft)', 3, 12, 0.5)}
               {n('stayAngle', 'Brace angle (degrees)', 15, 75, 1)}
-              {choice('stayDirection', 'Brace direction', ['inside', 'outside'])}
+              {c.stayCount === 1 &&
+                choice('stayDirection', 'Single brace direction', ['inside', 'outside'])}
               {n('stayCount', 'Stays per assembly', 1, 2, 1)}
               {n('strainerInterval', 'Maximum tension interval (ft)', 25, 500, 25)}
             </div>
+            <p className="help">
+              Paired supports lean into the same main pole from opposite directions along the fence,
+              matching the supplied site photo. One assembly uses two support poles. Placement
+              interval still needs vendor confirmation.
+            </p>
             <p className="help">
               Original support ratio: 363 ÷ 106 = 3.42 main posts per support. This is quotation
               arithmetic, not an engineering recommendation. {b.stays} support poles are currently

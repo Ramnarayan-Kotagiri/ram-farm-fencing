@@ -77,7 +77,7 @@ export const baseConfig: FenceConfig = {
   stayLength: 6,
   stayAngle: 45,
   stayDirection: 'inside',
-  stayCount: 1,
+  stayCount: 2,
   strainerInterval: 100,
   footingMode: 'strainers',
   footingShape: 'square',

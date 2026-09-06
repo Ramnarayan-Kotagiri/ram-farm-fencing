@@ -13,7 +13,7 @@ for folder in ['src', 'tests', 'public', '.github', 'scripts']:
     source_files.extend(p for p in (root / folder).rglob('*') if p.is_file())
 for name in ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'tsconfig.json',
              'vite.config.ts', 'index.html', '.gitignore', '.prettierrc.json',
-             'README.md', 'VERIFICATION.md']:
+             'README.md', 'VERIFICATION.md', 'SAAS-PLAN.md']:
     source_files.append(root / name)
 with ZipFile(out / 'ram-farm-fencing-source.zip', 'w', ZIP_DEFLATED) as archive:
     for p in source_files:

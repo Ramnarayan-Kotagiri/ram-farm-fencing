@@ -2,6 +2,47 @@ import { useId } from 'react';
 import type { FenceConfig, Scenario } from '../data/scenarios';
 import { hasMesh, wireHeights, calculate, lengthFor } from '../geometry/materialCalculator';
 import { sides, type SideId } from '../data/farmSurvey';
+import { supportDimensions } from '../geometry/supportGeometry';
+export function SupportAssembly({ config: c }: { config: FenceConfig }) {
+  const { height, run } = supportDimensions(c);
+  const scale = Math.min(25, 125 / Math.max(run, 1), 130 / Math.max(c.poleLength - c.embed, 1));
+  return (
+    <figure className="support-assembly">
+      <svg
+        viewBox="0 0 360 215"
+        role="img"
+        aria-label="Two slanted support poles meeting the main pole from opposite directions along the fence"
+      >
+        <rect width="360" height="215" rx="12" fill="#f5f7ef" />
+        <path d="M20 175H340" stroke="#9a855e" strokeWidth="2" />
+        <path
+          d={`M180 175V${175 - (c.poleLength - c.embed) * scale}`}
+          stroke="#7e887a"
+          strokeWidth="10"
+        />
+        {Array.from({ length: c.stayCount }, (_, j) => (
+          <path
+            key={j}
+            d={`M${180 + (j === 0 ? -1 : 1) * run * scale} 175L180 ${175 - height * scale}`}
+            stroke="#9ca496"
+            strokeWidth="9"
+          />
+        ))}
+        <text x="180" y="24" textAnchor="middle" fontSize="13" fill="#304d37">
+          {c.stayCount} diagonal support {c.stayCount === 1 ? 'pole' : 'poles'} · {c.stayLength} ft
+          each
+        </text>
+        <text x="180" y="200" textAnchor="middle" fontSize="12" fill="#52614a">
+          Along the fence · one main pole per assembly
+        </text>
+      </svg>
+      <figcaption>
+        Paired stays follow the site photo. Attachment height and ground contact are schematic;
+        confirm placement on site.
+      </figcaption>
+    </figure>
+  );
+}
 export function CrossSection({ config: c }: { config: FenceConfig }) {
   const patternId = useId().replaceAll(':', ''),
     scale = 27,
@@ -195,16 +236,21 @@ export function Elevation({
                 height={p.config.poleLength * 25}
                 fill={p.reuse ? '#719076' : p.condition === 'unknown' ? '#c2a565' : '#899387'}
               />
-              {p.stays > 0 && (
+              {Array.from({ length: p.stays }, (_, j) => (
                 <line
+                  key={j}
                   x1={50 + p.chainage * scale}
-                  y1={y - 95}
-                  x2={50 + p.chainage * scale + 35}
+                  y1={y - supportDimensions(p.config).height * 25}
+                  x2={
+                    50 +
+                    p.chainage * scale +
+                    supportDimensions(p.config).run * scale * (j === 0 ? -1 : 1)
+                  }
                   y2={y}
                   stroke="#929a8d"
                   strokeWidth="4"
                 />
-              )}
+              ))}
             </g>
           ))}
         {scenario.gates

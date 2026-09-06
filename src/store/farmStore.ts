@@ -2,10 +2,20 @@ import { useSyncExternalStore } from 'react';
 import { preset, parseScenario, type Scenario } from '../data/scenarios';
 import { defaultRates, type Rates } from '../data/pricing';
 import { validateGates } from '../geometry/materialCalculator';
-export type State = { scenario: Scenario; rates: Rates; saved: Scenario[] };
+export type State = {
+  scenario: Scenario;
+  rates: Rates;
+  saved: Scenario[];
+  supportRevision?: number;
+};
 export let startupWarning = '';
 const listeners = new Set<() => void>();
-let state: State = { scenario: preset(), rates: { ...defaultRates }, saved: [] };
+let state: State = {
+  scenario: preset(),
+  rates: { ...defaultRates },
+  saved: [],
+  supportRevision: 2,
+};
 try {
   const raw = localStorage.getItem('ram-farm-v1');
   if (raw) {
@@ -14,9 +24,19 @@ try {
     validateGates(scenario);
     state = {
       scenario,
+      supportRevision: 2,
       rates: cleanRates(data.rates),
       saved: (data.saved || []).slice(0, 20).map(parseScenario),
     };
+    if (data.supportRevision !== 2) {
+      localStorage.setItem('ram-farm-before-paired-supports', raw);
+      for (const sections of Object.values(state.scenario.sections)) {
+        for (const section of sections) section.config.stayCount = 2;
+      }
+      localStorage.setItem('ram-farm-v1', JSON.stringify(state));
+      startupWarning =
+        'Plan updated to two diagonal support poles per assembly. Quantities and costs recalculated; your previous plan is backed up on this device.';
+    }
   }
   if (location.hash.startsWith('#plan=')) {
     const shared = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(6)))));
@@ -53,7 +73,7 @@ export function cleanRates(input: unknown): Rates {
 export function commit(next: State) {
   parseScenario(next.scenario);
   validateGates(next.scenario);
-  state = next;
+  state = { ...next, supportRevision: 2 };
   try {
     localStorage.setItem('ram-farm-v1', JSON.stringify(state));
   } catch {

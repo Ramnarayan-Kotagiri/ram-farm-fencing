@@ -2,6 +2,8 @@
 
 A static React + TypeScript + Vite planning tool for the merged 22.04-acre Vadlapalli oil-palm farm. It combines a survey plan, geographic map, synthetic Three.js boundary walk, fence configurator, post register, editable BOQ, scenario comparison, and printable contractor pack.
 
+The latest revision defaults to Farmer View, adds expandable customization drawers in both Farmer and Vendor views, and shows two rectangular diagonal support poles leaning into one main pole from opposite directions along the fence. Support quantities are recalculated; the historical quotation is immutable. Existing local plans receive a one-time paired-support update, with the previous JSON backed up under `ram-farm-before-paired-supports` in browser storage. Imported/shared explicit configurations retain their specified counts.
+
 ## Run locally
 
 Use Node 22 or newer. The checked-in lockfile uses pnpm 11.19.0.
@@ -17,7 +19,9 @@ pnpm preview
 
 The requested npm equivalents also work: `npm install`, `npm run dev`, `npm test`, `npm run build`. Prefer pnpm for reproducing the checked-in dependency versions; do not mix lockfiles in a deployment change. `dist/` is the production static site. It needs an HTTP server, rather than opening its index file using `file://`.
 
-## Publish on GitHub Pages
+## Publish the personal demonstration on GitHub Pages
+
+For the proposed commercial SaaS, use the architecture and rollout in [SAAS-PLAN.md](SAAS-PLAN.md). GitHub Pages excludes commercial SaaS hosting. This app remains a local-storage demonstration; hosted user accounts, arbitrary farm onboarding and secure admin permissions are planned, not deployed.
 
 1. Create a dedicated repository, for example `ram-farm-fencing`, under the intended GitHub account. Choose visibility deliberately: the supplied source documents contain the exact farm location and the quotation image contains contact details.
 2. Add this project’s source files, `public/`, lockfile and `.github/workflows/deploy.yml`. Exclude `node_modules/`, `.pnpm-store/`, `tmp/` and `dist/` (already in `.gitignore`). Do not replace an existing unrelated website repository.
